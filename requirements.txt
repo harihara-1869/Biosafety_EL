@@ -9,6 +9,7 @@ defusedxml==0.7.1
 Flask==3.1.2
 fonttools==4.60.0
 fpdf2==2.8.4
+gunicorn==23.0.0
 idna==3.11
 inflect==7.5.0
 iniconfig==2.1.0
