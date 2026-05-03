@@ -6,6 +6,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
 // Load environment variables
 dotenv.config();
@@ -16,11 +17,12 @@ const productRoutes = require('./routes/productRoutes');
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Middleware
 // Enable CORS for frontend communication
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+    origin: isProduction ? false : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
@@ -30,6 +32,11 @@ app.use(express.json());
 
 // Parse URL-encoded request bodies
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static frontend files in production
+if (isProduction) {
+    app.use(express.static(path.join(__dirname, 'public')));
+}
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -51,17 +58,28 @@ app.get('/api/health', (req, res) => {
 
 // Root endpoint
 app.get('/', (req, res) => {
-    res.json({
-        message: 'Food Compliance Checker API',
-        version: '1.0.0',
-        endpoints: {
-            health: '/api/health',
-            searchProducts: '/api/products/search?query=<name>&page=<num>',
-            getByBarcode: '/api/products/barcode/:code',
-            getById: '/api/products/:id'
-        }
-    });
+    if (isProduction) {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    } else {
+        res.json({
+            message: 'Food Compliance Checker API',
+            version: '1.0.0',
+            endpoints: {
+                health: '/api/health',
+                searchProducts: '/api/products/search?query=<name>&page=<num>',
+                getByBarcode: '/api/products/barcode/:code',
+                getById: '/api/products/:id'
+            }
+        });
+    }
 });
+
+// SPA fallback - serve index.html for all other routes in production
+if (isProduction) {
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+}
 
 // 404 handler for unknown routes
 app.use((req, res) => {
