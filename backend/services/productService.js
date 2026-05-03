@@ -8,8 +8,8 @@ const { parseAdditives } = require('../utils/chemicalCodes');
 
 // Open Food Facts API base URLs
 const OFF_API_BASE = 'https://world.openfoodfacts.org';
-const SEARCH_URL = `${OFF_API_BASE}/cgi/search.pl`;
-const PRODUCT_URL = `${OFF_API_BASE}/api/v0/product`;
+const SEARCH_URL = `${OFF_API_BASE}/api/v2/search`;
+const PRODUCT_URL = `${OFF_API_BASE}/api/v2/product`;
 
 /**
  * Calculate health score based on product data
@@ -162,14 +162,14 @@ async function searchProducts(query, page = 1, pageSize = 20) {
         const response = await axios.get(SEARCH_URL, {
             params: {
                 search_terms: query,
-                search_simple: 1,
-                action: 'process',
-                json: 1,
                 page: page,
                 page_size: pageSize,
                 fields: 'code,product_name,product_name_en,brands,image_url,image_front_url,nutriscore_grade,nutrition_grades'
             },
-            timeout: 15000 // 15 second timeout
+            headers: {
+                'User-Agent': 'FoodCompliance/1.0 (https://food-compliance-checker-512442756526.asia-south1.run.app; contact: support@foodcompliance.app)'
+            },
+            timeout: 15000
         });
 
         const data = response.data;
@@ -202,6 +202,9 @@ async function searchProducts(query, page = 1, pageSize = 20) {
 async function getProductByBarcode(barcode) {
     try {
         const response = await axios.get(`${PRODUCT_URL}/${barcode}.json`, {
+            headers: {
+                'User-Agent': 'FoodCompliance/1.0 (https://food-compliance-checker-512442756526.asia-south1.run.app; contact: support@foodcompliance.app)'
+            },
             timeout: 15000
         });
 
