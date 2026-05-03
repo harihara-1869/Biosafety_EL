@@ -5,6 +5,7 @@ WORKDIR /app
 
 # Build frontend
 COPY frontend/package*.json ./frontend/
+COPY frontend/ ./frontend/
 WORKDIR /app/frontend
 RUN npm ci && npm run build
 
@@ -20,7 +21,7 @@ RUN npm ci --only=production
 COPY backend/ ./
 
 # Copy built frontend assets
-COPY --from=builder /app/frontend/dist ./public
+COPY --from=builder /app/backend/public ./public
 
 ENV NODE_ENV=production
 ENV PORT=8080

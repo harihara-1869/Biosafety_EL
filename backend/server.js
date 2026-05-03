@@ -33,17 +33,6 @@ app.use(express.json());
 // Parse URL-encoded request bodies
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static frontend files in production
-if (isProduction) {
-    app.use(express.static(path.join(__dirname, 'public')));
-}
-
-// Request logging middleware
-app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
-});
-
 // API Routes
 app.use('/api/products', productRoutes);
 
@@ -55,6 +44,11 @@ app.get('/api/health', (req, res) => {
         uptime: process.uptime()
     });
 });
+
+// Serve static frontend files in production
+if (isProduction) {
+    app.use(express.static(path.join(__dirname, 'public')));
+}
 
 // Root endpoint
 app.get('/', (req, res) => {
